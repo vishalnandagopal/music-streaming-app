@@ -1,0 +1,22 @@
+LICENSE
+.gitignore
+*.md
+*.db
+*.log
+.git
+demo.py
+
+testing.py
+poetry.lock
+pyproject.toml
+
+__pycache__
+*.py[cod]
+*$py.class
+
+flask_session/
+
+.DS_STORE
+
+# Cython debug symbols
+cython_debug/
