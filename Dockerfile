@@ -8,10 +8,10 @@ COPY requirements.txt /
 
 RUN ["pip","install","-r","requirements.txt"]
 
-WORKDIR /virt-jcomp
+WORKDIR /mad1-project
 
 COPY . .
 
 ENV PYTHONUNBUFFERED=1
 
-CMD gunicorn --bind 0.0.0.0:8000 --workers 3 wsgi:app
+CMD gunicorn --bind 0.0.0.0:8000 --workers 4 wsgi:app

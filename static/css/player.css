@@ -1,0 +1,22 @@
+.songs-playlists {
+    display: flex;
+}
+.song {
+    margin: 1rem;
+    padding: 1rem;
+    border: 0.08rem solid black;
+    border-radius: 1rem;
+    min-width: fit-content;
+    width: 15rem;
+    height: 5.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    & button {
+        width: 2.5rem;
+        margin-right: 1rem;
+    }
+    & .name-and-button{
+        margin-bottom: 0.25rem;
+    }
+}

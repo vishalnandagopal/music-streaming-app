@@ -1,0 +1,12 @@
+.user-type-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+.form-group {
+    margin: 1rem;
+    & input[type="radio"] {
+        margin: 0 0.5rem;
+    }
+}

@@ -1,0 +1,26 @@
+[
+    {
+        "music_id": "blankspace",
+        "name": "Blank Space",
+        "artist": "Taylor Swift",
+        "album": "1989",
+        "genre": "Pop",
+        "year": "2014"
+    },
+    {
+        "music_id": "chaleya",
+        "name": "Chaleya",
+        "artist": "Arijit Singh",
+        "album": "Jawan",
+        "genre": "Bollywood",
+        "year": "2023"
+    },
+    {
+        "music_id": "hua_mai",
+        "name": "Hua Mai",
+        "album": "Animal",
+        "year": 2023,
+        "genre": "Bollywood",
+        "artist": "Vishal Mishra"
+    }
+]

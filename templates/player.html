@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<link rel="stylesheet" href="/static/css/player.css">
+<section>
+    <!-- A template for a music player site. -->
+    <!-- The player should have a play button, a pause button, and a stop button. -->
+    <!-- The player should also have a slider that shows the current position of the song. -->
+    <!-- The player should also have a slider that allows the user to change the volume. -->
+    <p>Welcome! Listen to your favourite songs!</p>
+    <section class="songs-playlists">
+        <!-- A section that shows songs on the left, and playlists on the right -->
+        <div class="songs">
+            {% for song in available_songs %}
+            <div class="song">
+                <!-- Play icon -->
+                <div class="name-and-button">
+                    <button>
+                        <img src="/static/images/play.svg" alt="play" class="play-icon"></button>
+                    <span>{{ song.name }}</span>
+                </div>
+                <div>
+                    <p>{{ song.artist }} • {{ song.album }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="playlists">
+            {% for playlist in available_playlists %}
+            <div class="playlist">
+                <p>{{ playlist.name }}</p>
+                <p>{{ str(len(playlist.music_ids)) + "songs" }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</section>
+
+{% endblock %}
