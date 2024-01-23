@@ -3,25 +3,24 @@
 {% block main %}
 
 <link rel="stylesheet" href="/static/css/player.css">
+<script src="/static/js/player.js"></script>
+
 <section>
-    <!-- A template for a music player site. -->
-    <!-- The player should have a play button, a pause button, and a stop button. -->
-    <!-- The player should also have a slider that shows the current position of the song. -->
-    <!-- The player should also have a slider that allows the user to change the volume. -->
     <p>Welcome! Listen to your favourite songs!</p>
     <section class="songs-playlists">
         <!-- A section that shows songs on the left, and playlists on the right -->
         <div class="songs">
             {% for song in available_songs %}
-            <div class="song">
+            <div class="song" id="{{ song.music_id }}">
                 <!-- Play icon -->
                 <div class="name-and-button">
-                    <button>
+                    <!-- When button is clicked, load the file at /static/audio/music_id.mp4 and play it-->
+                    <button onclick="loadAudio('{{ song.music_id }}')" class="btn">
                         <img src="/static/images/play.svg" alt="play" class="play-icon"></button>
-                    <span>{{ song.name }}</span>
+                    <span class="song-name">{{ song.name }}</span>
                 </div>
                 <div>
-                    <p>{{ song.artist }} • {{ song.album }}</p>
+                    <p><span class="artist">{{ song.artist }}</span> • <span class="album">{{ song.album }}</span></p>
                 </div>
             </div>
             {% endfor %}
@@ -34,6 +33,13 @@
             </div>
             {% endfor %}
         </div>
+    </section>
+    <section id="audio-player-section" style="display:none">
+        <div song="details">
+            <p id="current-song-name"></p>
+            <p id="current-song-artist"></p>
+        </div>
+        <audio id="audio-player" controls src=""></audio>
     </section>
 </section>
 

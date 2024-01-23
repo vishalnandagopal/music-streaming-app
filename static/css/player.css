@@ -16,7 +16,32 @@
         width: 2.5rem;
         margin-right: 1rem;
     }
-    & .name-and-button{
+    & .name-and-button {
         margin-bottom: 0.25rem;
     }
+}
+
+#audio-player-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    margin:auto;
+    > div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        & #current-song-name {
+            margin: 1rem;
+        }
+        & #current-song-artist {
+            margin: 1rem;
+        }
+    }
+}
+#audio-player {
+    margin: auto;
+    width:100%;
 }

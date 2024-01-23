@@ -5,7 +5,8 @@
         "artist": "Taylor Swift",
         "album": "1989",
         "genre": "Pop",
-        "year": "2014"
+        "year": 2014,
+        "lyrics": ""
     },
     {
         "music_id": "chaleya",
@@ -13,7 +14,8 @@
         "artist": "Arijit Singh",
         "album": "Jawan",
         "genre": "Bollywood",
-        "year": "2023"
+        "year": 2023,
+        "lyrics": ""
     },
     {
         "music_id": "hua_mai",
@@ -21,6 +23,34 @@
         "album": "Animal",
         "year": 2023,
         "genre": "Bollywood",
-        "artist": "Vishal Mishra"
+        "artist": "Vishal Mishra",
+        "lyrics": ""
+    },
+    {
+        "music_id": "maamadhura_dhee",
+        "name": "Maamadhura",
+        "artist": "Dhee",
+        "genre": "Pop",
+        "album": "Jigarthanda Double X",
+        "year": 2023,
+        "lyrics": ""
+    },
+    {
+        "music_id": "ranjha_shersha",
+        "name": "Ranjha",
+        "album": "Shershaah",
+        "artist": "Arijit Singh",
+        "year": 2022,
+        "lyrics": "",
+        "genre": "Romantic"
+    },
+    {
+        "music_id": "rowdy_baby",
+        "name": "Rowdy Baby",
+        "artist": "Dhanush",
+        "year": 2019,
+        "genre": "Pop",
+        "album": "Maari 2",
+        "lyrics": ""
     }
 ]

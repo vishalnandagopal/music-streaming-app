@@ -1,3 +1,5 @@
+from json import load
+from os.path import dirname
 from sqlite3 import connect
 
 from .miscellaneous import hasher
@@ -68,6 +70,10 @@ def create_user(username: str, password: str, name: str, type: int) -> bool:
     return db.insert_if_not_exists("users", username, hasher(password), name, type)
 
 
+def add_to_blacklist(text: str) -> bool:
+    return db.insert_if_not_exists("blacklist", text)
+
+
 class Song:
     def __init__(self, db_row: list):
         self.music_id = db_row[0]
@@ -76,6 +82,7 @@ class Song:
         self.album = db_row[3]
         self.genre = db_row[4]
         self.year = db_row[5]
+        self.lyrics = db_row[6]
 
 
 class Playlist:
@@ -88,6 +95,28 @@ class Playlist:
         self.music = list(
             map(lambda x: Song(db.fetchone("music", (x,))), self.music_ids)
         )
+
+
+def add_song_to_db(song: Song, raw_file) -> bool:
+    # Add to database and save mp4 into the static/audio folder, with the music_id.mp4 as the file name
+    # Also check if it exists in blacklist
+
+    if db.exists("blacklist", song.name) or db.exists("blacklist", song.artist):
+        return False
+
+    with open(dirname(__file__) + f"/../static/audio/{song.music_id}.mp4", "wb") as f:
+        f.write(raw_file.read())
+
+    return db.insert_if_not_exists(
+        "music",
+        song.music_id,
+        song.name,
+        song.artist,
+        song.album,
+        song.genre,
+        song.year,
+        song.lyrics,
+    )
 
 
 def get_available_songs() -> list[Song]:
@@ -119,6 +148,11 @@ def get_available_playlists(username: str) -> list[Playlist]:
     )
 
 
+def fetch_song_details_from_db(music_id: str) -> Song:
+    # Fetch song details from the db and return it as a Song object
+    return Song(db.fetchone("music", (music_id,)))
+
+
 if __name__ in {"database", "src.database", "__main__"}:
     db = SqliteWrapper("music-app.db")
 
@@ -142,7 +176,8 @@ if __name__ in {"database", "src.database", "__main__"}:
             artist VARCHAR(20) NOT NULL,
             album VARCHAR(20) NOT NULL,
             genre VARCHAR(20) NOT NULL,
-            year INT NOT NULL
+            year INT NOT NULL,
+            lyrics VARCHAR(1000) NOT NULL
             )
         """
     )
@@ -153,7 +188,7 @@ if __name__ in {"database", "src.database", "__main__"}:
                     playlist_id VARCHAR(20) PRIMARY KEY NOT NULL,
                     name VARCHAR(20) NOT NULL,
                     owner VARCHAR(20) NOT NULL,
-                    music_ids VARCHAR(20) NOT NULL,
+                    music_ids VARCHAR(20) NOT NULL,-- Comma separated list of music_ids
                     privacy INT NOT NULL DEFAULT 0,
                     FOREIGN KEY (owner) REFERENCES users(username)
                )
@@ -161,11 +196,9 @@ if __name__ in {"database", "src.database", "__main__"}:
     )
 
     db.execute(
-        """CREATE TABLE IF NOT EXISTS blacklist
+        f"""CREATE TABLE IF NOT EXISTS blacklist
         (
-            artist VARCHAR(20),
-            album VARCHAR(20),
-            name VARCHAR(20)
+            text VARCHAR(20) PRIMARY KEY NOT NULL
         )
         """
     )
@@ -174,19 +207,8 @@ if __name__ in {"database", "src.database", "__main__"}:
     create_user("creator", "creator", "Arijit Singh", 1)  # Normal user
     create_user("admin", "admin", "Admin", 0)  # Admin
 
-    # Read a json file at data.json and insert all the songs into the database
-    """JSON file is a list of dictionaries, with each dictionary in he format     {
-        "music_id": "blankspace",
-        "name": "Blank Space",
-        "artist": "Taylor Swift",
-        "album": "1989",
-        "genre": "Pop",
-        "year": "2014"
-    },"""
-    import json
-
     with open("data.json", "r") as f:
-        data = json.load(f)
+        data = load(f)
         for song in data:
             db.insert_if_not_exists(
                 "music",
@@ -196,10 +218,8 @@ if __name__ in {"database", "src.database", "__main__"}:
                 song["album"],
                 song["genre"],
                 song["year"],
+                song["lyrics"],
             )
 
     print(db.fetchall("users"))
     print(db.fetchall("music"))
-
-else:
-    print(__name__)

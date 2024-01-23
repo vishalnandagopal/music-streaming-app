@@ -1,27 +1,23 @@
 from os import getenv
 
 from dotenv import load_dotenv
-from flask import (
-    Flask,
-    Response,
-    flash,
-    get_flashed_messages,
-    redirect,
-    render_template,
-)
+from flask import Flask, flash, get_flashed_messages, jsonify, redirect, render_template
 from flask import request as r
 from flask import session as sesh
-from icecream import ic
 
 from flask_session import Session
 
 from .database import (
+    Song,
+    add_song_to_db,
+    add_to_blacklist,
     check_password,
     check_user_exists,
     create_user,
+    fetch_song_details_from_db,
     fetch_user_details,
-    get_available_songs,
     get_available_playlists,
+    get_available_songs,
 )
 
 # Initialize Flask app
@@ -114,11 +110,71 @@ def register_user():
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    flashed_messages = get_flashed_messages()
+    previously_flashed_messages = get_flashed_messages()
     sesh.clear()
-    for message in flashed_messages:
-        flash(message)
+    map(flash, previously_flashed_messages)
     return redirect("/login")
+
+
+@app.route("/upload_song", methods=["POST"])
+def upload_song():
+    """accept and process a music file sent by the user, and send it to the add_song_to_db function
+    return a success or failure message the"""
+
+    # Check admin or creator
+    if not check_logged_in(sesh, 2) or not check_logged_in(sesh, 0):
+        flash(
+            "You are not allowed to access that page. Try logging in with a different account"
+        )
+        return render_template("login.html"), 403
+
+    f = r.form
+
+    if not {"name", "artist", "album", "genre", "year", "lyrics", "file"}.issubset(
+        f.keys()
+    ):
+        return {"msg": "Malformed request"}, 400
+    raw_file = f["file"]
+
+    return add_song_to_db(
+        Song(f["name"], f["artist"], f["album"], f["genre"], f["year"], f["lyrics"]),
+        raw_file,
+    )
+
+
+@app.route("/fetch_song_details", methods=["POST"])
+def fetch_song_details():
+    """Fetch song details from the database"""
+
+    d = r.json
+
+    if not {"music_id"}.issubset(d.keys()):
+        return {"msg": "Malformed request"}, 400
+    song_details = fetch_song_details_from_db(d["music_id"])
+
+    return jsonify(song_details.__dict__)
+
+
+@app.route("/blacklist", methods=["GET", "POST"])
+def blacklist():
+    """Blacklist some text into the database"""
+
+    if not check_logged_in(sesh, 0):
+        flash(
+            "You are not allowed to access that page. Try logging in with a different account"
+        )
+        return render_template("login.html"), 403
+
+    if r.method == "POST":
+        f = r.form
+
+        if not {"text"}.issubset(f.keys()):
+            return {"msg": "Malformed request"}, 400
+
+        add_to_blacklist(f["text"])
+        flash(f"Blacklisted {f['text']} successfully")
+
+    return render_template("blacklist.html")
 
 
 @app.route("/add_to_playlist", methods=["GET", "POST"])
@@ -182,6 +238,9 @@ def search():
 
 
 def check_logged_in(sesh: dict, user_type: int | None = None) -> bool:
+    """Check whether a user is logged in.
+    user_type 0 for admin, 1 for user, 2 for creator. Ignore user_type if you just want to check if they are logged in
+    """
     if user_type == None and "username" in sesh:
         # Just checking if logged in as any user
         return True
@@ -194,13 +253,11 @@ def check_logged_in(sesh: dict, user_type: int | None = None) -> bool:
 if __name__ == "__main__":
     load_dotenv()
 
-    port = int(getenv("PORT")) if getenv("PORT") else 80
-    debug = (getenv("DEBUG").casefold() if getenv("DEBUG") else None) in {
+    port = int(getenv("PORT")) if getenv("PORT") else 8000
+    debug = str(getenv("DEBUG")).casefold() in {
         "y",
         "yes",
-        "t",
         "true",
-        "True",
     }
 
     app.run(host="0.0.0.0", port=port, debug=debug)

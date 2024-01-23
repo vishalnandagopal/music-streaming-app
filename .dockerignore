@@ -7,8 +7,7 @@ LICENSE
 demo.py
 
 testing.py
-poetry.lock
-pyproject.toml
+requirements.txt
 
 __pycache__
 *.py[cod]
