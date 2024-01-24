@@ -3,54 +3,60 @@
         "music_id": "blankspace",
         "name": "Blank Space",
         "artist": "Taylor Swift",
+        "added_by": "creator",
         "album": "1989",
         "genre": "Pop",
         "year": 2014,
-        "lyrics": ""
+        "lyrics": "Baby I am a nightmare dressed like a daydream. So it's gonna be forever, Or it's gonna go down in flames. You can tell me when it's over, If the high was worth the pain. Got a long list of ex-lovers, They'll tell you I'm insane. 'Cause you know I love the players, And you love the game. 'Cause we're young and we're reckless, We'll take this way too far. It'll leave you breathless, Or with a nasty scar. Got a long list of ex-lovers, They'll tell you I'm insane. But I've got a blank space baby, And I'll write your name."
     },
     {
         "music_id": "chaleya",
         "name": "Chaleya",
         "artist": "Arijit Singh",
         "album": "Jawan",
+        "added_by": "creator",
         "genre": "Bollywood",
         "year": 2023,
-        "lyrics": ""
+        "lyrics": "Rhaangan de yaar chaleya  "
     },
     {
         "music_id": "hua_mai",
         "name": "Hua Mai",
         "album": "Animal",
+        "added_by": "creator",
         "year": 2023,
         "genre": "Bollywood",
         "artist": "Vishal Mishra",
-        "lyrics": ""
+        "lyrics": "Hua mai, Hua mai, mai hoon animal"
     },
     {
         "music_id": "maamadhura_dhee",
         "name": "Maamadhura",
         "artist": "Dhee",
+        "added_by": "creator",
         "genre": "Pop",
         "album": "Jigarthanda Double X",
         "year": 2023,
-        "lyrics": ""
+        "lyrics": "Dhee dhee maamadhura dhee"
     },
     {
         "music_id": "ranjha_shersha",
         "name": "Ranjha",
         "album": "Shershaah",
+        "added_by": "creator",
         "artist": "Arijit Singh",
         "year": 2022,
-        "lyrics": "",
+        "lyrics": "Oh mera dola dola dola dola dola dola re",
         "genre": "Romantic"
     },
     {
         "music_id": "rowdy_baby",
         "name": "Rowdy Baby",
+        "added_by": "creator",
         "artist": "Dhanush",
         "year": 2019,
         "genre": "Pop",
         "album": "Maari 2",
-        "lyrics": ""
+        "lyrics": "En goli sodaave, En kari kozhambave, Un kutty puppy naan, Take me. En silku sattae, Nee weightu kattae, Loveu sotta sotta, Talk me talk me. My dear rani, Rowdy baby, Kanne kalaimaane, Rowdy baby, My dear rani, Rowdy baby, Kanne kalaimaane, Rowdy baby"
     }
 ]

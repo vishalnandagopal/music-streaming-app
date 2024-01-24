@@ -83,6 +83,31 @@ class Song:
         self.genre = db_row[4]
         self.year = db_row[5]
         self.lyrics = db_row[6]
+        self.owner = db_row[7]
+        self.search_data = [
+            self.music_id.casefold(),
+            self.name.casefold(),
+            self.artist.casefold(),
+            self.album.casefold(),
+            self.genre.casefold(),
+            str(self.year),
+        ]
+
+    def search(self, query: str) -> bool:
+        q = query.casefold().strip()
+        for data in self.search_data:
+            if q in data:
+                return True
+        return False
+
+    def to_json(self) -> dict:
+        return self.__dict__
+
+    def __str__(self) -> str:
+        return self.__dict__.__str__()
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class Playlist:
@@ -125,6 +150,7 @@ def get_available_songs() -> list[Song]:
 
 def get_available_playlists(username: str) -> list[Playlist]:
     '''
+    Fetch all playlists that have a privacy of 0 or if have been created by the user
     ""CREATE TABLE IF NOT EXISTS playlists
                (
                     playlist_id VARCHAR(20) PRIMARY KEY NOT NULL,
@@ -136,7 +162,6 @@ def get_available_playlists(username: str) -> list[Playlist]:
                )
     """
     '''
-    # Fetch all playlists that have a privacy of 0 or if have been created by the user
     return list(
         map(
             lambda x: Playlist(x),
@@ -151,6 +176,15 @@ def get_available_playlists(username: str) -> list[Playlist]:
 def fetch_song_details_from_db(music_id: str) -> Song:
     # Fetch song details from the db and return it as a Song object
     return Song(db.fetchone("music", (music_id,)))
+
+
+def update_song_details_in_db(music_id: str, *params) -> bool:
+    # Update song details in the db
+    db.execute(
+        "UPDATE music SET name=?, artist=?, album=?, genre=?, year=?, lyrics=? WHERE music_id=?",
+        params + (music_id,),
+    )
+    return True
 
 
 if __name__ in {"database", "src.database", "__main__"}:
@@ -177,7 +211,9 @@ if __name__ in {"database", "src.database", "__main__"}:
             album VARCHAR(20) NOT NULL,
             genre VARCHAR(20) NOT NULL,
             year INT NOT NULL,
-            lyrics VARCHAR(1000) NOT NULL
+            lyrics VARCHAR(1000) NOT NULL,
+            owner VARCHAR(20) NOT NULL,
+            FOREIGN KEY (owner) REFERENCES users(username)
             )
         """
     )
@@ -203,9 +239,9 @@ if __name__ in {"database", "src.database", "__main__"}:
         """
     )
 
-    create_user("user", "user", "Vishal N", 1)  # Normal user
-    create_user("creator", "creator", "Arijit Singh", 1)  # Normal user
     create_user("admin", "admin", "Admin", 0)  # Admin
+    create_user("user", "user", "Vishal N", 1)  # Normal user
+    create_user("creator", "creator", "Arijit Singh", 2)  # Creator user
 
     with open("data.json", "r") as f:
         data = load(f)
@@ -219,7 +255,8 @@ if __name__ in {"database", "src.database", "__main__"}:
                 song["genre"],
                 song["year"],
                 song["lyrics"],
+                song["added_by"],
             )
 
-    print(db.fetchall("users"))
-    print(db.fetchall("music"))
+    # print(db.fetchall("users"))
+    # print(db.fetchall("music"))

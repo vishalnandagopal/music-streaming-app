@@ -18,6 +18,7 @@ from .database import (
     fetch_user_details,
     get_available_playlists,
     get_available_songs,
+    update_song_details_in_db,
 )
 
 # Initialize Flask app
@@ -58,7 +59,7 @@ def login():
                         case 1:
                             return redirect("/player")
                         case 2:
-                            return redirect("/creator_dashboard")
+                            return redirect("/creator")
                         case 0:
                             return redirect("/admin")
                 else:
@@ -202,10 +203,50 @@ def player():
     return redirect("/logout")
 
 
-@app.route("/creator_dashboard", methods=["GET", "POST"])
-def creator_dashboard():
+@app.route("/creator", methods=["GET", "POST"])
+def creator():
     if check_logged_in(sesh, 2):
-        return render_template("creator_dashboard.html")
+        available_songs = list(
+            filter(
+                lambda song: song.owner == sesh["username"],
+                get_available_songs(),
+            ),
+        )
+        return render_template("creator.html", available_songs=available_songs)
+    flash(
+        "You are not allowed to access that page. Try logging in with a different account"
+    )
+    return redirect("/logout")
+
+
+@app.route("/edit_song_details/<music_id>", methods=["GET", "POST"])
+def edit_song_details(music_id: str):
+    if check_logged_in(sesh, 2):
+        song = fetch_song_details_from_db(music_id)
+        if song.owner == sesh["username"]:
+            if r.method == "POST":
+                f = r.form
+                if not {"name", "artist", "album", "genre", "year", "lyrics"}.issubset(
+                    f.keys()
+                ):
+                    return {
+                        "msg": "Malformed request. Not all required keys present"
+                    }, 400
+                print(f["name"])
+                if update_song_details_in_db(
+                    music_id,
+                    f["name"],
+                    f["artist"],
+                    f["album"],
+                    f["genre"],
+                    f["year"],
+                    f["lyrics"],
+                ):
+                    flash("Updated successfully")
+                else:
+                    flash("Could not update song")
+                return redirect("/creator")
+            return render_template("edit_song_details.html", song=song)
     flash(
         "You are not allowed to access that page. Try logging in with a different account"
     )
@@ -232,9 +273,25 @@ def profile():
     return redirect("/logout")
 
 
-@app.route("/search", methods=["GET", "POST"])
-def search():
+@app.route("/search", methods=["POST"])
+@app.route("/search?q=<query>", methods=["GET"])
+def search(query: str):
     check_logged_in(sesh)
+    if r.method == "POST":
+        return jsonify(
+            list(
+                map(
+                    lambda x: x.to_json(),
+                    filter(
+                        lambda song: song.search(r.form["query"]), get_available_songs()
+                    ),
+                )
+            )
+        )
+    return render_template(
+        "player.html",
+        results=filter(lambda song: song.search(query), get_available_songs()),
+    )
 
 
 def check_logged_in(sesh: dict, user_type: int | None = None) -> bool:

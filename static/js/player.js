@@ -3,11 +3,7 @@
 // When user clicks on the play button, the audio should start playing
 // When user clicks on the pause button, the audio should pause
 
-function playAudio() {
-    document.getElementById("audio").play();
-}
-
-function loadAudio(music_id) {
+function playSong(music_id) {
     document.getElementById("audio-player-section").style.display = "flex";
     d = document.getElementById("audio-player");
     d.src = "/static/audio/" + music_id + ".mp4";
@@ -38,9 +34,26 @@ function updateAudioDetails(music_id) {
         .then((data) => {
             document.getElementById("current-song-name").innerText =
                 data["name"];
-            document.getElementById("current-song-artist").innerHTML =
+            document.getElementById("current-song-artist").innerText =
                 data["artist"];
-            document.getElementById("current-song-album").innerHTML =
+            document.getElementById("current-song-album").innerText =
                 data["album"];
+            document.getElementById("current-song-lyrics").innerText =
+                data["lyrics"];
         });
+}
+function showLyrics() {
+    if (
+        document.getElementById("current-song-lyrics").style.display == "block"
+    ) {
+        document.getElementById("current-song-lyrics").style.display = "none";
+        return;
+    } else {
+        document.getElementById("current-song-lyrics").style.display = "block";
+    }
+}
+
+async function autoPlay(music_id) {
+    await new Promise((r) => setTimeout(r, 1000));
+    playSong(music_id);
 }

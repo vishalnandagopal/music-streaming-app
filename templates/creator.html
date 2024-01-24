@@ -16,9 +16,22 @@
                     <!-- Play icon -->
                     <div class="name-and-buttons">
                         <!-- When button is clicked, load the file at /static/audio/music_id.mp4 and play it-->
-                        <button onclick="playSong('{{ song.music_id }}')" class="btn">
-                            <img src="/static/images/play.svg" alt="play" class="play-icon"></button>
+                        <div class="play-button">
+                            <button onclick="playSong('{{ song.music_id }}')" class="btn">
+                                <img src="/static/images/play.svg" alt="play" class="play-icon">
+                            </button>
+                        </div>
                         <span class="song-name">{{ song.name }}</span>
+
+                        <div class="edit-button">
+                            <!-- When button is pressed, load /edit_song_details/<music_id> -->
+                            <a href="/edit_song_details/{{ song.music_id }}">
+                                <button class="btn">
+                                    <img src="/static/images/edit.svg" alt="edit" class="edit-icon">
+                                </button>
+                            </a>
+
+                        </div>
                     </div>
                     <div>
                         <p><span class="artist">{{ song.artist }}</span> • <span class="album">{{ song.album }}</span>
@@ -55,8 +68,4 @@
         </div>
     </section>
 </section>
-<script>
-    playSong("{{ available_songs[0].music_id }}");
-</script>
-
 {% endblock %}
