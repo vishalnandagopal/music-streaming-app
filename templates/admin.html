@@ -2,14 +2,14 @@
 
 {% block main %}
 
-<link rel="stylesheet" href="/static/css/creator.css">
+<link rel="stylesheet" href="/static/css/admin.css">
 <script src="/static/js/player.js"></script>
 
 <section>
     <section class="songs-playlists">
         <!-- A section that shows songs on the left, and playlists on the right -->
         <div class="songs-div">
-            <h3 style="justify-content: left; margin:1rem;">Your songs</h3>
+            <h3 style="justify-content: left; margin:1rem;">All songs</h3>
             <div class="songs">
                 {% for song in available_songs %}
                 <div class="song" id="{{ song.music_id }}">
@@ -23,14 +23,18 @@
                         </div>
                         <span class="song-name">{{ song.name }}</span>
 
-                        <div class="edit-button">
+                        <div class="buttons">
                             <!-- When button is pressed, load /edit_song_details/<music_id> -->
                             <a href="/edit_song_details/{{ song.music_id }}">
                                 <button class="btn">
                                     <img src="/static/images/edit.svg" alt="edit" class="edit-icon">
                                 </button>
                             </a>
-
+                            <a href="/delete_song/{{ song.music_id }}">
+                                <button class="btn">
+                                    <img src="/static/images/delete.svg" alt="delete" class="delete-icon">
+                                </button>
+                            </a>
                         </div>
                     </div>
                     <div>
@@ -41,13 +45,13 @@
                 {% endfor %}
             </div>
         </div>
-        <div class="upload-div">
-            <p>Upload a new song</p>
-            <p>As a creator, you have the power to upload new songs</p>
-            <!-- Button that goes to /upload_song  on click -->
-            <a href="/upload_song">
-                <button class="btn btn-primary">Upload</button>
-            </a>
+        <div class="stats-div">
+            <!-- Show stats of number of songs, number of creators, number of playlists, etc -->
+            <h3 style="justify-content: left; margin:1rem;">Stats</h3>
+            <p>Number of songs: <span class="stat">{{ num_songs }}</span></p>
+            <p>Number of creators: <span class="stat">{{ num_creators }}</span></p>
+            <p>Number of playlists: <span class="stat">{{ num_playlists }}</span></p>
+            <p>Number of listeners: <span class="stat">{{ num_listeners }}</span></p>
         </div>
     </section>
     <section id="audio-player-section" style="display:none">

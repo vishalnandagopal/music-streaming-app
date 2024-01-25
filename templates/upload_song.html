@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<link rel="stylesheet" href="/static/css/upload_song.css">
+
+<section id="upload-song-details">
+    <!-- A page to edit song details. Shows the fields and their current. Submit button that posts the details to the same url -->
+    <h1>Edit song details</h1>
+    <form method="POST" action="/upload_song" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">Song name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Song name">
+        </div>
+        <div class="form-group">
+            <label for="artist">Artist</label>
+            <input type="text" class="form-control" id="artist" name="artist" placeholder="Artist">
+        </div>
+        <div class="form-group">
+            <label for="album">Album</label>
+            <input type="text" class="form-control" id="album" name="album" placeholder="Album">
+        </div>
+        <div class="form-group">
+            <label for="lyrics">Lyrics</label>
+            <textarea class="form-control" id="lyrics" name="lyrics" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="genre">Genre</label>
+            <input type="text" class="form-control" id="genre" name="genre" placeholder="Genre">
+        </div>
+        <div class="form-group">
+            <label for="year">Year</label>
+            <input type="text" class="form-control" id="year" name="year" placeholder="Year">
+        </div>
+        <!-- Accept music file -->
+        <div class="form-group">
+            <label for="file">Music file</label>
+            <input type="file" class="form-control-file" id="file" name="file">
+        </div>
+        <!-- Readonly creator name -->
+        <div class="form-group">
+            <label for="creator">Uploading as</label>
+            <input type="text" class="form-control" id="creator" name="creator" value="{{ name }}" placeholder="Creator"
+                readonly>
+        </div>
+        <button type="submit" id="button-div" class="btn btn-primary">Submit</button>
+    </form>
+
+</section>
+
+{% endblock %}

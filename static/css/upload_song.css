@@ -1,0 +1,8 @@
+#upload-song-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    #button-div {
+        margin: 1rem auto 0rem auto;
+    }
+}

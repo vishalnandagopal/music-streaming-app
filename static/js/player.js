@@ -6,7 +6,7 @@
 function playSong(music_id) {
     document.getElementById("audio-player-section").style.display = "flex";
     d = document.getElementById("audio-player");
-    d.src = "/static/audio/" + music_id + ".mp4";
+    d.src = "/static/audio/" + music_id;
     d.play();
 
     // When the audio ends, the audio player should disappear

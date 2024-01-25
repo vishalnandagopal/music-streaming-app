@@ -1,5 +1,6 @@
 from json import load
-from os.path import dirname
+from os import remove
+from os.path import dirname, splitext
 from sqlite3 import connect
 
 from .miscellaneous import hasher
@@ -8,7 +9,7 @@ primary_keys = {
     "users": "username",
     "music": "music_id",
     "playlists": "playlist_id",
-    "blacklist": "name",
+    "blacklist": "text",
 }
 
 
@@ -44,6 +45,15 @@ class SqliteWrapper:
 
     def exists(self, table, key) -> bool:
         return self.fetchone(table, (key,)) != None
+
+    def like(self, table: str, key: str) -> bool:
+        cur = self.db.cursor()
+        res = cur.execute(
+            f"SELECT * FROM {table} WHERE {primary_keys[table]} LIKE '%{str(key).casefold()}%'",
+        )
+        data = res.fetchall()
+        cur.close()
+        return bool(data)
 
     def insert_if_not_exists(self, table, key, *params):
         if not self.exists(table, key):
@@ -122,16 +132,14 @@ class Playlist:
         )
 
 
-def add_song_to_db(song: Song, raw_file) -> bool:
+def add_song_to_db(song: Song, music_file) -> bool:
     # Add to database and save mp4 into the static/audio folder, with the music_id.mp4 as the file name
     # Also check if it exists in blacklist
 
-    if db.exists("blacklist", song.name) or db.exists("blacklist", song.artist):
+    if db.like("blacklist", song.name) or db.like("blacklist", song.artist):
         return False
-
-    with open(dirname(__file__) + f"/../static/audio/{song.music_id}.mp4", "wb") as f:
-        f.write(raw_file.read())
-
+    music_file.save(dirname(__file__) + f"/../static/audio/{song.music_id}")
+    print(f"Saved file {song.music_id}")
     return db.insert_if_not_exists(
         "music",
         song.music_id,
@@ -141,7 +149,20 @@ def add_song_to_db(song: Song, raw_file) -> bool:
         song.genre,
         song.year,
         song.lyrics,
+        song.owner,
     )
+
+
+def delete_song_from_db(music_id: str) -> bool:
+    # Delete song from the database and from the static/audio folder
+    try:
+        if db.exists("music", music_id):
+            remove(dirname(__file__) + f"/../static/audio/{music_id}")
+            db.execute("DELETE FROM music WHERE music_id=?", (music_id,))
+            return True
+    except Exception as e:
+        print(e)
+    return False
 
 
 def get_available_songs() -> list[Song]:
@@ -162,6 +183,10 @@ def get_available_playlists(username: str) -> list[Playlist]:
                )
     """
     '''
+    # Check if admin, user_type 0
+    if fetch_user_details(username)[3] == 0:
+        return list(map(lambda x: Playlist(x), db.fetchall("playlists")))
+
     return list(
         map(
             lambda x: Playlist(x),
@@ -185,6 +210,14 @@ def update_song_details_in_db(music_id: str, *params) -> bool:
         params + (music_id,),
     )
     return True
+
+
+def get_number_of_listeners() -> int:
+    return len(list(filter(lambda x: x[3] == 1, db.fetchall("users"))))
+
+
+def get_number_of_creators() -> int:
+    return len(list(filter(lambda x: x[3] == 2, db.fetchall("users"))))
 
 
 if __name__ in {"database", "src.database", "__main__"}:

@@ -1,9 +1,12 @@
 from os import getenv
+from os.path import splitext
+from uuid import uuid4
 
 from dotenv import load_dotenv
 from flask import Flask, flash, get_flashed_messages, jsonify, redirect, render_template
 from flask import request as r
 from flask import session as sesh
+from werkzeug.utils import secure_filename
 
 from flask_session import Session
 
@@ -14,10 +17,13 @@ from .database import (
     check_password,
     check_user_exists,
     create_user,
+    delete_song_from_db,
     fetch_song_details_from_db,
     fetch_user_details,
     get_available_playlists,
     get_available_songs,
+    get_number_of_creators,
+    get_number_of_listeners,
     update_song_details_in_db,
 )
 
@@ -26,6 +32,18 @@ app = Flask("Music Streaming App")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["UPLOAD_EXTENSIONS"] = [
+    ".mp3",
+    ".mp4",
+    ".ogg",
+    ".wav",
+    ".flac",
+    ".aac",
+    ".wma",
+    ".m4a",
+]
+app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 10
+
 
 Session(app)
 
@@ -117,30 +135,54 @@ def logout():
     return redirect("/login")
 
 
-@app.route("/upload_song", methods=["POST"])
+@app.route("/upload_song", methods=["GET", "POST"])
 def upload_song():
-    """accept and process a music file sent by the user, and send it to the add_song_to_db function
-    return a success or failure message the"""
+    """accept and process a music file sent by the user, and send it to the add_song_to_db function. Return a success or failure message the"""
 
     # Check admin or creator
-    if not check_logged_in(sesh, 2) or not check_logged_in(sesh, 0):
+    if not (check_logged_in(sesh, 2) or check_logged_in(sesh, 0)):
         flash(
             "You are not allowed to access that page. Try logging in with a different account"
         )
-        return render_template("login.html"), 403
+        return redirect("/logout")
 
+    if r.method == "GET":
+        return render_template("upload_song.html", name=sesh["username"])
+
+    music_file = r.files["file"]
+
+    if music_file.filename == "":
+        return {"msg": "No filename"}, 400
+
+    music_file.filename = secure_filename(music_file.filename)
+    # Checking if file is allowed
+    if splitext(music_file.filename)[1] not in app.config["UPLOAD_EXTENSIONS"]:
+        return {"msg": "Invalid file extension"}, 400
+
+    # Checking other fields
     f = r.form
+    if not {"name", "artist", "album", "genre", "year", "lyrics"}.issubset(f.keys()):
+        return {"msg": "Malformed request. Missing keys"}, 400
 
-    if not {"name", "artist", "album", "genre", "year", "lyrics", "file"}.issubset(
-        f.keys()
+    if add_song_to_db(
+        Song(
+            [
+                str(uuid4()),
+                f["name"],
+                f["artist"],
+                f["album"],
+                f["genre"],
+                f["year"],
+                f["lyrics"],
+                sesh["username"],
+            ],
+        ),
+        music_file,
     ):
-        return {"msg": "Malformed request"}, 400
-    raw_file = f["file"]
-
-    return add_song_to_db(
-        Song(f["name"], f["artist"], f["album"], f["genre"], f["year"], f["lyrics"]),
-        raw_file,
-    )
+        flash("Song uploaded successfully")
+        return redirect("/creator")
+    flash("Could not upload song")
+    return redirect("/creator")
 
 
 @app.route("/fetch_song_details", methods=["POST"])
@@ -164,7 +206,7 @@ def blacklist():
         flash(
             "You are not allowed to access that page. Try logging in with a different account"
         )
-        return render_template("login.html"), 403
+        return redirect("/logout"), 403
 
     if r.method == "POST":
         f = r.form
@@ -221,32 +263,46 @@ def creator():
 
 @app.route("/edit_song_details/<music_id>", methods=["GET", "POST"])
 def edit_song_details(music_id: str):
-    if check_logged_in(sesh, 2):
-        song = fetch_song_details_from_db(music_id)
-        if song.owner == sesh["username"]:
-            if r.method == "POST":
-                f = r.form
-                if not {"name", "artist", "album", "genre", "year", "lyrics"}.issubset(
-                    f.keys()
-                ):
-                    return {
-                        "msg": "Malformed request. Not all required keys present"
-                    }, 400
-                print(f["name"])
-                if update_song_details_in_db(
-                    music_id,
-                    f["name"],
-                    f["artist"],
-                    f["album"],
-                    f["genre"],
-                    f["year"],
-                    f["lyrics"],
-                ):
-                    flash("Updated successfully")
-                else:
-                    flash("Could not update song")
-                return redirect("/creator")
-            return render_template("edit_song_details.html", song=song)
+    if not (check_logged_in(sesh, 2) or check_logged_in(sesh, 0)):
+        flash(
+            "You are not allowed to access that page. Try logging in with a different account"
+        )
+        return redirect("/logout")
+    song = fetch_song_details_from_db(music_id)
+    if song.owner == sesh["username"] or sesh["user_type"] == 0:
+        if r.method == "POST":
+            f = r.form
+            if not {"name", "artist", "album", "genre", "year", "lyrics"}.issubset(
+                f.keys()
+            ):
+                return {"msg": "Malformed request. Not all required keys present"}, 400
+            print(f["name"])
+            if update_song_details_in_db(
+                music_id,
+                f["name"],
+                f["artist"],
+                f["album"],
+                f["genre"],
+                f["year"],
+                f["lyrics"],
+            ):
+                flash("Updated successfully")
+            else:
+                flash("Could not update song")
+            if sesh["user_type"] == 0:
+                return redirect("/admin")
+            return redirect("/creator")
+        return render_template("edit_song_details.html", song=song)
+
+
+@app.route("/delete_song/<music_id>", methods=["GET", "POST"])
+def delete_song(music_id: str):
+    if check_logged_in(sesh, 0):
+        if delete_song_from_db(music_id):
+            flash("Deleted successfully")
+        else:
+            flash("Could not delete song")
+        return redirect("/admin")
     flash(
         "You are not allowed to access that page. Try logging in with a different account"
     )
@@ -256,7 +312,18 @@ def edit_song_details(music_id: str):
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     if check_logged_in(sesh, 0):
-        return render_template("admin.html")
+        num_songs = len(get_available_songs())
+        num_listeners = get_number_of_listeners()
+        num_creators = get_number_of_creators()
+        num_playlists = len(get_available_playlists(sesh["username"]))
+        return render_template(
+            "admin.html",
+            available_songs=get_available_songs(),
+            num_songs=num_songs,
+            num_listeners=num_listeners,
+            num_creators=num_creators,
+            num_playlists=num_playlists,
+        )
     flash(
         "You are not allowed to access that page. Try logging in with a different account"
     )

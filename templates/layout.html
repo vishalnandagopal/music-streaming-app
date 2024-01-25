@@ -62,9 +62,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/login" tabindex="-1">Login</a>
                         </li>
+                        {% if 'username' in session %}
                         <li class="nav-item">
                             <a class="nav-link" href="/logout" tabindex="-1">Logout</a>
                         </li>
+                        {% endif %}
                     </ul>
                     <form class="d-flex" name="search" id="search" action="/search" method="POST">
                         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">

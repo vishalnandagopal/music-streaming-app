@@ -1,0 +1,110 @@
+.songs-playlists {
+    display: flex;
+    max-height: 40%;
+    padding-top: 0rem;
+    .songs-div,
+    .playlists-div {
+        width: 50%;
+        border: 1px solid black;
+        margin: 1rem;
+        border-radius: 5%;
+    }
+    .songs {
+        overflow-y: auto;
+        height: 80%;
+    }
+    .upload-div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 1rem;
+        border: 1px solid black;
+        border-radius: 5%;
+        width: 50%;
+        min-height: 80%;
+    }
+}
+.song {
+    margin: 1rem;
+    padding: 1rem;
+    border: 0.08rem solid black;
+    border-radius: 1rem;
+    min-width: fit-content;
+    width: 95%;
+    height: 5.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    button {
+        width: 2.5rem;
+        margin-right: 1rem;
+    }
+    .name-and-buttons {
+        margin-bottom: 0.25rem;
+        display: flex;
+    }
+    .edit-button {
+        margin-left: auto;
+    }
+}
+
+#audio-player-section {
+    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    margin: auto;
+    background-color: #504646;
+    color: white;
+    border: #5046463e 0.25rem solid;
+    border-radius: 1rem;
+    > div {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+        height: 2rem;
+        .current {
+            margin: 1rem;
+        }
+        .song-name::before {
+            /* Music emoji */
+            content: "\1F3B5";
+        }
+        .artist::before {
+            /* Microphone emoji */
+            content: "\1F3A4";
+        }
+        .album::before {
+            /* CD emoji */
+            content: "\1F4BF";
+        }
+        #lyrics-button::before {
+            /* Book emoji */
+            content: "\1F4D6";
+        }
+        #lyrics-button {
+            color: white;
+        }
+    }
+    #current-song-lyrics {
+        position: relative;
+        width: 20vw;
+        overflow-y: auto;
+        background-color: #3b3434;
+        border-radius: 1rem;
+        padding: 1rem;
+        bottom: 15vh;
+        left: 20vw;
+        z-index: 1;
+        height: 30vh;
+        display: none;
+    }
+}
+#audio-player {
+    margin: auto;
+    width: 100%;
+}
