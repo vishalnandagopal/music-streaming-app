@@ -27,6 +27,8 @@ from .database import (
     update_song_details_in_db,
 )
 
+load_dotenv()
+
 # Initialize Flask app
 app = Flask("Music Streaming App")
 app.config["SESSION_PERMANENT"] = False
@@ -374,14 +376,11 @@ def check_logged_in(sesh: dict, user_type: int | None = None) -> bool:
     return True
 
 
+port = int(getenv("PORT")) if getenv("PORT") else 80
+debug = str(getenv("DEBUG")).casefold() in {
+    "y",
+    "yes",
+    "true",
+}
 if __name__ == "__main__":
-    load_dotenv()
-
-    port = int(getenv("PORT")) if getenv("PORT") else 8000
-    debug = str(getenv("DEBUG")).casefold() in {
-        "y",
-        "yes",
-        "true",
-    }
-
     app.run(host="0.0.0.0", port=port, debug=debug)

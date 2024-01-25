@@ -1,6 +1,6 @@
 from random import randint
 from faker import Faker
-from database import db
+from src.database import db
 
 for i in range(100):
     name = Faker().name()
